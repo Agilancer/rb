@@ -26,6 +26,7 @@ button.on{background:#ffd23f}
 @keyframes pop{0%{transform:translate(-50%,-50%) scale(.2) rotate(-12deg);opacity:1}25%{transform:translate(-50%,-80%) scale(1.25) rotate(6deg)}100%{transform:translate(-50%,-190%) scale(1) rotate(-4deg);opacity:0}}
 .tag{position:absolute;transform:translate(-50%,-100%);text-align:center;font-size:12px;font-weight:800;color:#fff;text-shadow:0 1px 2px #000,0 0 3px #000;white-space:nowrap}
 .tag u{display:block;width:64px;height:8px;border:2px solid #1b2a4a;border-radius:5px;background:#333;margin:2px auto 0;overflow:hidden}
+.tag.dead{opacity:.55}.tag.dead u{display:none}
 .tag u s{display:block;height:100%;background:#4de36b}
 #help{position:fixed;inset:0;background:#1b2a4acc;z-index:20;display:flex;align-items:center;justify-content:center}
 #help div{background:#fff;border:4px solid #1b2a4a;border-radius:20px;padding:18px 26px;max-width:640px;max-height:90vh;overflow:auto;box-shadow:0 8px 0 #1b2a4a}
@@ -45,9 +46,10 @@ button.on{background:#ffd23f}
 <div id="help"><div>
 <h1>REALISTIC BEATUP</h1>
 <p><b>Pick something</b> from the bottom menu, then <b>click in the world</b> to drop it. Keep clicking to drop more!</p>
+<p><b>Click any character</b> to see their vitals: health, blood, pain, heart rate, temperature and injuries.</p>
 <p><b>Left mouse</b>: use the selected tool (Grab is the default &mdash; drag and fling anything). <b>Right mouse</b>: use the power you picked last (starts as Punch). <b>Middle mouse / arrow keys</b>: move camera. <b>Wheel</b>: zoom.</p>
-<p><kbd>Space</kbd> pause &nbsp; <kbd>G</kbd> slow-mo &nbsp; <kbd>H</kbd> heal everyone &nbsp; <kbd>Shift</kbd>+<kbd>R</kbd> reset room &nbsp; <kbd>Z</kbd> undo &nbsp; <kbd>X</kbd> delete under mouse &nbsp; <kbd>F</kbd> freeze under mouse &nbsp; <kbd>Q</kbd>/<kbd>E</kbd> spin what you hold &nbsp; <kbd>F1</kbd> this help</p>
-<p>Tools on the left: weld things together, tie ropes, pin, freeze, grow, shrink, clone, set on fire, zap, shoot and more. Machines switch on and off with the <b>Switch</b> tool.</p>
+<p><kbd>Space</kbd> pause &nbsp; <kbd>G</kbd> slow-mo &nbsp; <kbd>H</kbd> heal everyone &nbsp; <kbd>R</kbd> reset room &nbsp; <kbd>Z</kbd> undo &nbsp; <kbd>X</kbd> delete under mouse &nbsp; <kbd>F</kbd> freeze under mouse &nbsp; <kbd>Q</kbd>/<kbd>E</kbd> spin what you hold &nbsp; <kbd>F1</kbd> this help</p>
+<p>Tools on the left: <b>Scissors</b> cut limbs off at any joint (drag to slice), <b>Rope</b> ties to limbs and necks, <b>Grenade</b> lobs frag grenades, plus weld, pin, freeze, ignite, zap and the rest. Hard hits bruise and break bones, sharp things cut, limbs tear off. <b>Brawl</b> makes everyone fight; <b>Gore</b> turns the blood off. <b>3D MODE</b> lets you run around as Martlebrough.</p>
 <p style="text-align:center"><button id="go" style="font-size:22px;padding:10px 30px;background:#7cf29a">PLAY!</button></p>
 </div></div>
 <script type="module" src="game.js"></script>
