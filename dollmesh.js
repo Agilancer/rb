@@ -13,7 +13,9 @@ const BONE_SEG = Object.fromEntries(Object.entries(SEG_BONE).map(([s, b]) => [b,
 export const boneKey = n => n.replace(/^mixamorig:?/, '');
 
 // Prepare a loaded glTF scene: material, rigid skin weights, per-vertex segment ids, scale to height (feet at y=0).
-export function prepModel(sc, tex, height) {
+// extra townsfolk from the bm repo: [name, height, hips height, icon]
+export const FOLK = { knight_blue: ['Blue Knight', 1.86, 1.036, '🛡️'], lord_red: ['Red Lord', 1.8, .995, '🤴'], lady_blue: ['Blue Lady', 1.68, .975, '👸'], crone: ['Crone', 1.55, .851, '🧙‍♀️'], smith: ['Blacksmith', 1.74, .942, '⚒️'], sage: ['Sage', 1.7, .887, '🧙'], old_man: ['Old Man', 1.72, .904, '👴'], worker: ['Worker', 1.83, .99, '👷'], dude: ['Dude', 1.79, .954, '🧔'], elder: ['Elder', 1.76, .952, '🧓'] };
+export function prepModel(sc, tex, height, hips) {
   let mesh = null; sc.traverse(o => { if (o.isSkinnedMesh) mesh = o; });
   mesh.material = new THREE.MeshStandardMaterial({ map: tex, roughness: .85 });
   const sk = mesh.skeleton, g = mesh.geometry, si = g.attributes.skinIndex, sw = g.attributes.skinWeight, n = si.count;
@@ -26,7 +28,8 @@ export function prepModel(sc, tex, height) {
   si.needsUpdate = sw.needsUpdate = true;
   sc.updateMatrixWorld(true); let top = 0, bot = 1e9;
   sc.traverse(o => { if (o.isBone) { const y = o.getWorldPosition(new THREE.Vector3()).y; if (/HeadTop/.test(o.name)) top = y; if (/Foot|Toe/.test(o.name)) bot = Math.min(bot, y); } });
-  const s = height / (top - bot + .06); sc.scale.setScalar(s); sc.position.y = -(bot - .05) * s;
+  let hipY = 0; sc.traverse(o => { if (o.isBone && /Hips$/.test(o.name)) hipY = o.getWorldPosition(new THREE.Vector3()).y; });
+  const s = top ? height / (top - bot + .06) : hips / (hipY - bot + .05); sc.scale.setScalar(s); sc.position.y = -(bot - .05) * s; sc.userData.top = height;
   sc.userData.segOf = segOf; sc.userData.index = g.index.array.slice();
   return sc;
 }
@@ -37,6 +40,14 @@ export function loadChars(onEach) {
     const tex = TL.load(`assets/models/${k}_c.webp`); tex.flipY = false; tex.colorSpace = THREE.SRGBColorSpace;
     out[k] = prepModel(g.scene, tex, CHARS[k][1]); onEach?.(k); res();
   }, undefined, err => { console.error('model failed', k, err); res(); })))).then(() => out);
+}
+
+export function loadFolk() {
+  const L = new GLTFLoader(), TL = new THREE.TextureLoader(), out = {};
+  return Promise.all(Object.keys(FOLK).map(k => new Promise(res => L.load(`assets/models/folk/${k}.glb`, g => {
+    const tex = TL.load(`assets/models/folk/${k}_c.webp`); tex.flipY = false; tex.colorSpace = THREE.SRGBColorSpace;
+    try { out[k] = prepModel(g.scene, tex, FOLK[k][1], FOLK[k][2]); } catch (e) { console.error('folk failed', k, e); } res();
+  }, undefined, err => { console.error('folk failed', k, err); res(); })))).then(() => out);
 }
 
 // One character instance. bones are keyed without the "mixamorig" prefix (Hips, LeftArm, ...).
