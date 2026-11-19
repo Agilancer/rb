@@ -344,7 +344,7 @@ function addCap(bone, pos, dir, r) {
 function sever(c, seg, vel) {
   if (!c || c.gone || !SEG_PARENT[seg] || c.inst.cut.has(seg)) return false;
   if (!c.rag) ragdoll(c);
-  const bone = c.bones[SEG_BONE[seg]], rest = c.restL.find(r => r[0] === bone), R = c.R.seg[seg];
+  const bone = c.bones[SEG_BONE[seg]], rest = c.restL.find(r => r[0] === bone), R = c.R.seg[seg]; if (!rest) return;
   c.inst.sever(seg); if (c.cons[seg]) { world.removeConstraint(c.cons[seg]); delete c.cons[seg]; }
   const r = seg === 'head' ? R.r * .5 : seg === 'chest' ? R.half[0] * .8 : Math.min(R.half[0], R.half[1]) * 1.25;
   const c1 = addCap(bone, V3(), V3(0, -1, 0), r), c2 = addCap(bone.parent, rest[1], V3(0, 1, 0).applyQuaternion(rest[2]).normalize(), r);
@@ -605,7 +605,7 @@ function doHit() {
   const inCone = (q, ext = 0) => { const dx = q.x - o.x, dz = q.z - o.z, d = Math.hypot(dx, dz); return Math.abs(q.y - o.y) < 2.2 + ext && (d < 1.1 + ext || (d < 2.7 + ext && (dx * fx + dz * fz) / d > .35)); };
   for (const c of npcs.slice()) {
     if (c.gone || !inCone(charPos(c))) continue; n++; const was = c.rag;
-    knock(c, V3(fx * 15 + rnd(-2, 2), rnd(7, 10), fz * 15 + rnd(-2, 2)), 30, true); maybeSever(c, .14);
+    knock(c, V3(fx * 18 + rnd(-2, 2), rnd(7, 10), fz * 18 + rnd(-2, 2)), 30, true); maybeSever(c, c.hp < 50 ? .3 : .14);
     if (!was) addScore(`${c.name} ${p.atkType === 'butt' ? 'headbutted' : 'kicked'}`, 50);
   }
   for (const t of things.slice()) { if (t.dead) continue; const big = t.kind === 'ball' ? 1 : (t.frozen && !t.pieces) ? .6 : .3; if (!inCone(t.body.position, big)) continue; n++; if (t.kind === 'ball') { const b = t.body; b.wakeUp(); b.velocity.set(fx * 15, 1, fz * 15); b.angularVelocity.set(fz * 14, 0, -fx * 14); continue; } hitThing(t, CV(fx * 15, 6, fz * 15), 56); }
@@ -658,7 +658,7 @@ function controlPlayer(h) {
   p.airT = p.ground ? 0 : (p.airT || 0) + h;
   if (p.jumpQ) { p.jumpQ = false; if (p.ground || p.airT < .12) { b.velocity.y = 9.5; p.jumps = 1; p.airT = 1; sfx('boing', .25); } else if (p.jumps < 2) { b.velocity.y = 9.5; p.jumps = 2; puff(b.position.x, b.position.y - .7, b.position.z, 8, 0xffffff, 2, .12); sfx('boing', .3); } }
   if (keys.KeyB) { p.jet = true; b.velocity.y = Math.min(b.velocity.y + 62 * h, 13); jetFx(b.position); }
-  if (p.atk > 0) { p.atk -= h; if (!p.atkHit && p.atk < .24) { p.atkHit = true; doHit(); } }
+  if (p.atk > 0) { p.atk -= h; if (!p.atkHit && p.atk < .32) { p.atkHit = true; doHit(); } }
 }
 let jetN = 0;
 function jetFx(p) { if ((jetN++ & 1) === 0) { spawnP(p.x + rnd(-.15, .15), p.y - .2, p.z + rnd(-.15, .15), rnd(-1, 1), -7, rnd(-1, 1), pick([0xffd23f, 0xff8a1c, 0xff4a1c]), rnd(.15, .3), rnd(.25, .45), 1); if (jetN % 6 === 0) { spawnP(p.x, p.y - .6, p.z, rnd(-1, 1), -2, rnd(-1, 1), 0x888888, .3, 1, 2); sfx('jet', .12); } } }
