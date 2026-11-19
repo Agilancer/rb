@@ -39,6 +39,15 @@ button.on{background:#ff9d2e;color:#1a1206;border-color:#ffc27a}
 #help h1{margin:0 0 6px;font-size:38px;color:#d0121b;letter-spacing:2px;text-align:center}
 #help p{margin:7px 0;font-size:14px;line-height:1.35}#help kbd{background:#ff9d2e;color:#1a1206;border-radius:5px;padding:0 5px;font-weight:800}
 #flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:9;transition:opacity .5s}
+#pick{position:fixed;inset:0;z-index:40;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;background:radial-gradient(circle at 50% 30%,#2a1418 0,#0b0d12 70%);color:#dfe6f2;padding:16px}
+#pick h1{margin:0;font-size:clamp(34px,7vw,72px);letter-spacing:4px;color:#d0121b;text-shadow:0 4px 0 #000,0 0 30px #d0121b55;text-align:center}
+#pick .sub{font-size:15px;color:#9aa6bb;letter-spacing:2px;text-transform:uppercase;text-align:center}
+#pick .cards{display:flex;gap:22px;flex-wrap:wrap;justify-content:center}
+#pick a{display:flex;flex-direction:column;gap:8px;width:min(330px,86vw);padding:20px 22px;border-radius:18px;border:3px solid #2a3550;background:#121826;color:#dfe6f2;text-decoration:none;transition:transform .12s,border-color .12s,box-shadow .12s;cursor:pointer}
+#pick a:hover,#pick a:focus{transform:translateY(-4px);border-color:#ff9d2e;box-shadow:0 10px 30px #ff9d2e33;outline:none}
+#pick a b{font-size:30px;letter-spacing:2px}#pick a i{font-style:normal;font-size:46px}
+#pick a span{font-size:14px;line-height:1.45;color:#aab4c6}#pick a em{font-style:normal;font-size:12px;font-weight:800;letter-spacing:1.5px;color:#ff9d2e}
+#pick .three{border-color:#5a3a20;background:linear-gradient(160deg,#1c2a1a,#121826 60%)}
 </style>
 <script type="importmap">{"imports":{"three":"./vendor/three.module.min.js"}}</script>
 <script src="vendor/matter.min.js"></script>
@@ -57,5 +66,22 @@ button.on{background:#ff9d2e;color:#1a1206;border-color:#ffc27a}
 <p><b>Scissors</b> cut limbs at any joint (drag to slice) and cut ropes. <b>Rope</b> ties to limbs and necks; pull hard enough and they tear. Hard hits bruise and break bones, sharp things cut, explosions dismember.</p>
 <p style="text-align:center"><button id="go" class="on" style="font-size:20px;padding:10px 34px">PLAY</button></p>
 </div></div>
+<div id="pick">
+  <h1>REALISTIC BEATUP</h1>
+  <div class="sub">Pick how you want to ruin everyone's day</div>
+  <div class="cards">
+    <a href="#" id="pick2d" tabindex="0"><i>🧪</i><b>2D LAB</b><span>The side-view sandbox. Drop people, tools, powers and disasters into a room and watch the physics happen.</span><em>MOUSE &middot; SANDBOX</em></a>
+    <a href="3d.html" id="pick3d" class="three" tabindex="0"><i>⛰️</i><b>3D WORLD</b><span>Third-person brawler across 1.5 km of hills: a town, a village, cannons, boulders and a lot of very surprised people.</span><em>WASD + MOUSE &middot; GAMEPAD</em></a>
+  </div>
+  <div class="sub" style="font-size:12px">Press 2 or 3 to choose</div>
+</div>
+<script>
+(function () {
+  const pk = document.getElementById('pick'), q = new URLSearchParams(location.search);
+  const go2d = e => { if (e) e.preventDefault(); pk.remove(); removeEventListener('keydown', key); };
+  const key = e => { if (e.key === '2') go2d(); else if (e.key === '3') location.href = '3d.html'; };
+  if (q.get('mode') === '2d') pk.remove(); else { document.getElementById('pick2d').onclick = go2d; addEventListener('keydown', key); }
+})();
+</script>
 <script type="module" src="game.js"></script>
 </body></html>
