@@ -194,7 +194,7 @@ function markMat(type) {
 }
 function addMark(b, type, wx, wy, size = .14, bleed = 0) {
   const d = b.plugin.doll; if (!d || !GORE) return null;
-  if (type !== 'stump') size = Math.min(size, (b.circleRadius ? b.circleRadius / S : /thigh|shin/.test(b.plugin.part) ? d.lt : /arm|fore/.test(b.plugin.part) ? d.at : .3) * .75);
+  if (type !== 'stump') size = Math.min(size, (b.circleRadius ? b.circleRadius / S : /thigh|shin/.test(b.plugin.part) ? d.lt : /arm|fore/.test(b.plugin.part) ? d.at : .3) * .5);
   const dx = wx * S - b.position.x, dy = -wy * S - b.position.y, c = Math.cos(-b.angle), s = Math.sin(-b.angle); let m;
   if (type === 'stump') { m = new THREE.Group(); const f = new THREE.Mesh(new THREE.SphereGeometry(size, 12, 8), stumpMat); f.scale.z = .7; const bn = new THREE.Mesh(new THREE.SphereGeometry(size * .45, 8, 6), boneMat); bn.position.z = size * .5; m.add(f, bn); }
   else { m = new THREE.Mesh(markGeo, markMat(type)); m.scale.set(size * 2, size * 2, 1); m.renderOrder = 6; }
