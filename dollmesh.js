@@ -20,12 +20,14 @@ export function prepModel(sc, tex, height, hips) {
   mesh.material = new THREE.MeshStandardMaterial({ map: tex, roughness: .85 });
   const sk = mesh.skeleton, g = mesh.geometry, si = g.attributes.skinIndex, sw = g.attributes.skinWeight, n = si.count;
   const segOfBone = sk.bones.map(b => { let o = b; while (o && o.isBone) { const s = BONE_SEG[boneKey(o.name)]; if (s) return SEGS.indexOf(s); o = o.parent; } return 0; });
-  const segOf = new Uint8Array(n);
+  // Keep the artist's smooth weights for the living body (rigid weights are what turned the armpits into
+  // a wing suit whenever an arm went up). A rigid copy is kept for when the body gets cut apart.
+  const segOf = new Uint8Array(n), rigidI = new Float32Array(n * 4), rigidW = new Float32Array(n * 4);
   for (let i = 0; i < n; i++) {
     let best = 0, bw = -1; for (let k = 0; k < 4; k++) { const w = sw.getComponent(i, k); if (w > bw) { bw = w; best = si.getComponent(i, k); } }
-    si.setXYZW(i, best, 0, 0, 0); sw.setXYZW(i, 1, 0, 0, 0); segOf[i] = segOfBone[best];
+    rigidI[i * 4] = best; rigidW[i * 4] = 1; segOf[i] = segOfBone[best];
   }
-  si.needsUpdate = sw.needsUpdate = true;
+  sc.userData.rigidI = rigidI; sc.userData.rigidW = rigidW;
   sc.updateMatrixWorld(true); let top = 0, bot = 1e9;
   sc.traverse(o => { if (o.isBone) { const y = o.getWorldPosition(new THREE.Vector3()).y; if (/HeadTop/.test(o.name)) top = y; if (/Foot|Toe/.test(o.name)) bot = Math.min(bot, y); } });
   let hipY = 0; sc.traverse(o => { if (o.isBone && /Hips$/.test(o.name)) hipY = o.getWorldPosition(new THREE.Vector3()).y; });
@@ -61,11 +63,17 @@ export function instance(model) {
   g2.setIndex(new THREE.BufferAttribute(model.userData.index.slice(), 1));
   mesh.geometry = g2; mesh.frustumCulled = false; mesh.material = mesh.material.clone();
   const cut = new Set(), segOf = model.userData.segOf, src = model.userData.index;
+  let rigid = false;
+  const makeRigid = () => {
+    if (rigid || !model.userData.rigidI) return; rigid = true; const si = g2.attributes.skinIndex, n = si.count;
+    const I = new (si.array.constructor)(n * 4); for (let i = 0; i < n * 4; i++) I[i] = model.userData.rigidI[i];
+    g2.setAttribute('skinIndex', new THREE.BufferAttribute(I, 4)); g2.setAttribute('skinWeight', new THREE.BufferAttribute(model.userData.rigidW.slice(), 4));
+  };
   const label = s => { let o = SEGS[s]; while (o) { if (cut.has(o)) return SEGS.indexOf(o) + 1; o = SEG_PARENT[o]; } return 0; };
   return {
     root, mesh, bones, cut,
     sever(seg) {
-      if (cut.has(seg) || !SEG_PARENT[seg]) return; cut.add(seg);
+      if (cut.has(seg) || !SEG_PARENT[seg]) return; cut.add(seg); makeRigid();
       const lab = SEGS.map((_, i) => label(i)), dst = g2.index.array; let n = 0;
       for (let i = 0; i < src.length; i += 3) { const a = lab[segOf[src[i]]]; if (a === lab[segOf[src[i + 1]]] && a === lab[segOf[src[i + 2]]]) { dst[n++] = src[i]; dst[n++] = src[i + 1]; dst[n++] = src[i + 2]; } }
       g2.setDrawRange(0, n); g2.index.needsUpdate = true;
