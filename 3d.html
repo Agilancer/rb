@@ -11,7 +11,13 @@ button:hover{border-color:#ffb02e}
 #cross{position:fixed;left:50%;top:50%;width:22px;height:22px;margin:-11px;pointer-events:none;z-index:4}
 #cross:before,#cross:after{content:"";position:absolute;background:#fff;box-shadow:0 0 2px #000}
 #cross:before{left:10px;top:0;width:2px;height:22px}#cross:after{top:10px;left:0;height:2px;width:22px}
-#tl{position:fixed;left:14px;top:12px;z-index:5;width:280px;pointer-events:none}
+#cross{transition:transform .12s,opacity .12s;opacity:.75;transform:scale(.8)}#cross.aim{opacity:1;transform:scale(.55)}#cross.aim:before,#cross.aim:after{background:#ffd23f}
+#map{position:fixed;left:14px;bottom:14px;width:190px;height:190px;border-radius:50%;border:3px solid #111c;box-shadow:0 3px 10px #0008;z-index:5;pointer-events:none}
+#combo{font-size:20px;font-weight:900;color:#ff5a3c;transition:opacity .3s}#wanted{font-size:22px;letter-spacing:2px;min-height:26px}#wanted i{opacity:.35;font-style:normal;color:#fff}
+#wanted .hot{animation:hot .4s steps(2) infinite}@keyframes hot{50%{opacity:.35}}
+#down{position:fixed;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;z-index:6;pointer-events:none;background:radial-gradient(#0000 40%,#3a0000aa);font-weight:900}
+#down b{font-size:72px;color:#ffb02e;letter-spacing:6px;text-shadow:0 4px 0 #000,0 0 30px #f408}#down small{font-size:16px;margin-top:6px;text-shadow:0 2px 3px #000}
+#tl{position:fixed;left:14px;bottom:216px;z-index:5;width:190px;pointer-events:none}
 .bar{height:12px;background:#0008;border:2px solid #000a;border-radius:6px;overflow:hidden;margin-bottom:5px}
 .bar i{display:block;height:100%;transition:width .15s}
 #hpbar{background:linear-gradient(#ff4b4b,#b1121b)}#jetbar{background:linear-gradient(#7fd8ff,#2a7fd0)}
@@ -19,14 +25,14 @@ button:hover{border-color:#ffb02e}
 #tr{position:fixed;right:14px;top:10px;text-align:right;z-index:5;pointer-events:none;text-shadow:0 2px 3px #000}
 #pts{font-size:34px;font-weight:900;color:#ffb02e}#tr small{display:block;font-size:12px;opacity:.85}
 #kills{font-size:12px}#fps{font-size:10px;opacity:.5}
-#slots{position:fixed;left:14px;bottom:12px;z-index:5;pointer-events:none;font-size:12px}
+#slots{position:fixed;right:14px;bottom:58px;z-index:5;pointer-events:none;font-size:12px;text-align:right}
 .sl{background:#000a;border-left:3px solid #ffb02e;margin-top:3px;padding:3px 8px;border-radius:0 6px 6px 0;min-width:230px}
 .sl.empty{opacity:.45;border-color:#666}.sl i{float:right;font-style:normal;color:#ffd58a;margin-left:8px}
-#feed{position:fixed;right:14px;top:110px;z-index:5;pointer-events:none;text-align:right;font-weight:800;font-size:14px}
+#feed{position:fixed;right:14px;top:150px;z-index:5;pointer-events:none;text-align:right;font-weight:800;font-size:14px}
 #feed div{margin-top:4px;text-shadow:0 2px 3px #000;transition:opacity .6s}#feed div b{color:#ffb02e}
 #feed .big{font-size:17px;background:#000a;padding:4px 10px;border-radius:6px;display:inline-block}
 #prompt{position:fixed;left:50%;top:60%;transform:translateX(-50%);z-index:5;font-weight:900;font-size:16px;text-shadow:0 2px 3px #000;pointer-events:none}
-#speed{position:fixed;right:20px;bottom:20px;font-size:40px;font-weight:900;color:#ffb02e;text-shadow:0 3px 4px #000;display:none;z-index:5}
+#speed{position:fixed;right:20px;bottom:110px;font-size:40px;font-weight:900;color:#ffb02e;text-shadow:0 3px 4px #000;display:none;z-index:5}
 #slow{position:fixed;left:50%;top:14px;transform:translateX(-50%);font-weight:900;color:#7fd8ff;letter-spacing:4px;display:none;z-index:5}
 #flash{position:fixed;inset:0;background:#c00;opacity:0;pointer-events:none;z-index:9;transition:opacity .35s}
 #btns{position:fixed;right:14px;bottom:14px;z-index:6;display:flex;gap:6px}
@@ -68,9 +74,9 @@ button:hover{border-color:#ffb02e}
 <div id="cross"></div>
 <div id="flash"></div>
 <div id="tl"><div class="bar"><i id="hpbar" style="width:100%"></i></div><div class="bar" style="height:7px"><i id="jetbar" style="width:100%"></i></div><div id="where">Goatsville</div></div>
-<div id="tr"><div id="pts">0</div><small>CHAOS</small><div id="kills"></div><div id="fps"></div></div>
+<div id="tr"><div id="pts">0</div><small>CHAOS</small><div id="combo"></div><div id="wanted"></div><div id="kills"></div><div id="fps"></div></div>
 <div id="feed"></div><div id="prompt"></div><div id="speed"></div><div id="slow">SLOW-MO</div>
-<div id="slots"></div>
+<div id="slots"></div><canvas id="map" width="190" height="190"></canvas><div id="down"><b>GOAT DOWN</b><small>the goat will be back in a moment</small></div>
 <div id="btns"><button id="binv">GEAR (Tab)</button><button id="bhelp">HELP (H)</button><button onclick="location.href='index.html'">2D</button></div>
 <div id="inv"><button id="invclose">CLOSE ✕</button>
   <div class="panel"><h2>THE GOAT</h2><div id="doll"></div></div>
@@ -79,11 +85,12 @@ button:hover{border-color:#ffb02e}
 <div id="help"><div>
 <h1>GOATSVILLE</h1><h2>A destruction sandbox. Everything breaks.</h2>
 <p>You are the golden goat. The town has towers up to 12 storeys, schools, a bank, a police station, a grocery store, houses and three parks full of physics toys. Every wall, floor and car can be blown apart. Monsters roam: kobolds, goblins, zombies, giants, a werewolf and rival goats. Villagers mostly just want to live.</p>
-<p><kbd>WASD</kbd> move · <kbd>Shift</kbd> sprint · <kbd>Space</kbd> jump / double jump · hold <kbd>B</kbd> jetpack · <kbd>Mouse</kbd> aim · <kbd>Wheel</kbd> zoom</p>
-<p><kbd>LMB</kbd> right hand · <kbd>RMB</kbd> left hand (or raise shield) · <kbd>F</kbd> shoulder mounts · <kbd>Q</kbd> leg mounts</p>
-<p><kbd>E</kbd> steal / leave a car, ride a zip line, or kick · in a car: <kbd>W</kbd>/<kbd>S</kbd> gas and reverse, <kbd>A</kbd>/<kbd>D</kbd> steer, <kbd>Space</kbd> handbrake, <kbd>Shift</kbd> boost. Shoulder and leg mounts still fire while driving.</p>
-<p><kbd>Tab</kbd> gear screen: put guns in either hand, missile pods and gatlings on the shoulders and legs. Weapon pickups glow gold all over town (the police armory is stocked).</p>
-<p><kbd>G</kbd> slow-mo · <kbd>H</kbd> help · <kbd>R</kbd> restart</p>
+<p><b>On foot</b> · <kbd>WASD</kbd> run (camera-relative) · <kbd>Shift</kbd> sprint · <kbd>Space</kbd> jump, again to front-flip · hold <kbd>B</kbd> jetpack · <kbd>Wheel</kbd> camera distance</p>
+<p><b>Goat stuff</b> · <kbd>E</kbd> headbutt (sprint into it for a charge) · hold <kbd>C</kbd> lick and drag anything, let go to throw it · <kbd>R</kbd> go limp (ragdoll), again to get up · <kbd>V</kbd> sword swing or kick</p>
+<p><b>Guns</b> · hold <kbd>RMB</kbd> to aim over the shoulder · <kbd>LMB</kbd> fire what's in your hands · pistols, rifles, shotguns, snipers, grenades, C4 and one nuke are lying around town</p>
+<p><b>Cars</b> · <kbd>F</kbd> jack the nearest car (the driver gets thrown out) or get out · <kbd>W</kbd>/<kbd>S</kbd> gas and reverse · <kbd>A</kbd>/<kbd>D</kbd> steer · <kbd>Space</kbd> handbrake drift · <kbd>Shift</kbd> boost · <kbd>LMB</kbd> fire mounts. Bail out at speed for a tumble.</p>
+<p><b>Heat</b> · hurting locals, jacking cars and fighting cops raises your 🚨 level. Cops on foot come first, then cruisers. Get out of sight and they lose you.</p>
+<p><kbd>Tab</kbd> gear screen: a weapon in each hand. Weapon pickups glow gold all over town; walk over one with full hands to swap. · <kbd>G</kbd> slow-mo · <kbd>H</kbd> help</p>
 <p style="text-align:center;margin-top:14px"><button id="go" disabled>LOADING…</button></p>
 <div id="loading">loading…</div>
 </div></div>

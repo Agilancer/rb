@@ -7,7 +7,7 @@ import { cell } from './vc/js/city.js';
 
 const V3 = THREE.Vector3;
 let C = null;           // the City being built
-const INFO = { spawn: new V3(0, 0, 18), pickups: [], spots: [], indoor: [], ramps: [], bounce: [], parks: [], parking: [], names: [] };
+const INFO = { foot: [], spawn: new V3(0, 0, 18), pickups: [], spots: [], indoor: [], ramps: [], bounce: [], parks: [], parking: [], names: [] };
 let seed = 7;
 const rnd = (a = 0, b = 1) => { seed = (seed * 16807) % 2147483647; return a + (b - a) * ((seed - 1) / 2147483646); };
 const pick = (a) => a[Math.floor(rnd() * a.length) % a.length];
@@ -69,6 +69,7 @@ function building(S) {
   const inner = F(S.inner || 'walls20', 3.2, 3.2), floorT = S.floor || 'paveB10', ceil = S.ceil || 'walls02';
   C.beginOwner('building');
   INFO.names.push({ name: S.name, x: (x0 + x1) / 2, z: (z0 + z1) / 2, top: n * fh });
+  INFO.foot.push({ x0, z0, x1, z1 });
   topFace(S.floor || 'paveB10', x0 + 0.05, z0 + 0.05, x1 - 0.05, z1 - 0.05, 0.03, 3);
   // Stairwell along one side: two lanes of 1.4 m, flights between 1.3 m landings at both ends
   const SW = 3.0, SLn = S.stairLen || Math.min(8.5, (z1 - z0) - 2 * T - 0.5);
@@ -284,6 +285,7 @@ function office(r) {
 
 // ---- ground and roads ---------------------------------------------------------------------------
 const GRID = [-210, -70, 70, 210], RW = 8, WALK = 3.5, EDGE = 250;
+INFO.map = { grid: GRID, rw: RW, edge: EDGE };
 function ground() {
   const g = (t, x0, z0, x1, z1, y, ts) => C.flat(C.groundBuf(t), t, x0, z0, x1, z1, y, (x, z) => [x / ts, -z / ts]);
   // grass over everything, roads and sidewalks over it
@@ -628,7 +630,7 @@ export function buildTown(city) {
   // football field by the high school
   C.flat(C.groundBuf('grass02'), 'grass02', -146, -146, -86, -96, 0.015, (x, z) => [x / 6, -z / 6]);
   for (const z of [-145, -97]) { C.beginOwner('goal'); C.prop('pole', -116, 3, z, 0.1, 6, 0.1, COL.yellow); C.prop('box', -116, 3, z, 5.6, 0.12, 0.12, COL.yellow); C.prop('pole', -118.8, 4.5, z, 0.07, 3, 0.07, COL.yellow); C.prop('pole', -113.2, 4.5, z, 0.07, 3, 0.07, COL.yellow); C.endOwner(); }
-  INFO.pickups.push(new V3(-116, 0, -121), new V3(0, 0, 10), new V3(8, 0, -8), new V3(-8, 0, 6), new V3(60, 0, 0), new V3(-60, 0, -10), new V3(0, 0, 66), new V3(0, 0, -66));
+  INFO.pickups.push(new V3(-116, 0, -121));
   return INFO;
 }
 export { INFO as TOWN };
