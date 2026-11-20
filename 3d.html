@@ -1,90 +1,91 @@
 <!doctype html>
-<html><head><meta charset="utf-8"><title>REALISTIC BEATUP 3D</title>
+<html><head><meta charset="utf-8"><title>REALISTIC BEATUP 3D · Goatsville</title>
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <style>
 *{box-sizing:border-box;user-select:none;-webkit-user-select:none}
-html,body{margin:0;height:100%;overflow:hidden;font-family:"Trebuchet MS","Segoe UI",sans-serif;background:#9fd6ff;color:#1b2a4a}
+html,body{margin:0;height:100%;overflow:hidden;font-family:"Trebuchet MS","Segoe UI",sans-serif;background:#0b0d12;color:#e8edf5}
 #c{position:fixed;inset:0;width:100%;height:100%;display:block}
-button,a.btn{font:inherit;font-weight:700;border:3px solid #1b2a4a;border-radius:12px;background:#fff;color:#1b2a4a;padding:6px 10px;cursor:pointer;box-shadow:0 4px 0 #1b2a4a;transition:transform .05s;text-decoration:none;display:inline-block;font-size:14px}
-button:active,a.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #1b2a4a}
-button.on{background:#ffd23f}button:disabled{opacity:.5;cursor:wait}
-#top{position:fixed;top:8px;right:8px;display:flex;gap:6px;z-index:5}
-#score{position:fixed;top:8px;left:8px;z-index:5;background:#ffffffee;border:3px solid #1b2a4a;border-radius:16px;box-shadow:0 5px 0 #1b2a4a;padding:6px 14px;min-width:170px}
-#score b{font-size:30px;display:block;line-height:1}
-#score span{font-size:12px;font-weight:800;letter-spacing:1px}
-#combo{font-weight:900;color:#e2334b;font-size:18px;height:22px}
-#obj{position:fixed;top:112px;left:8px;z-index:5;background:#ffffffdd;border:3px solid #1b2a4a;border-radius:14px;box-shadow:0 4px 0 #1b2a4a;padding:6px 10px;font-size:13px;font-weight:700;max-width:240px}
-#obj h3{margin:0 0 3px;font-size:13px;letter-spacing:1px;color:#e2334b}
-#obj div{padding:1px 0}
-#feed{position:fixed;top:56px;right:8px;z-index:4;display:flex;flex-direction:column;align-items:flex-end;gap:4px;pointer-events:none}
-#feed div{background:#1b2a4acc;color:#fff;font-weight:800;font-size:15px;padding:4px 12px;border-radius:14px;animation:fin .25s ease-out;transition:opacity .6s}
-#feed div b{color:#ffd23f;margin-left:6px}
-#feed div.big{background:#ffd23f;color:#1b2a4a;border:3px solid #1b2a4a}#feed div.big b{color:#e2334b}
-@keyframes fin{from{transform:translateX(60px);opacity:0}to{transform:none;opacity:1}}
-#keys{position:fixed;left:50%;transform:translateX(-50%);bottom:8px;background:#1b2a4acc;color:#fff;padding:5px 14px;border-radius:20px;font-size:13px;z-index:4;pointer-events:none;white-space:nowrap;max-width:calc(100vw - 220px);overflow:hidden}
-#keys kbd,#help kbd{background:#ffd23f;color:#1b2a4a;border:2px solid #1b2a4a;border-radius:6px;padding:0 5px;font-weight:800;font-family:inherit}
-#keys kbd{border-width:1px;margin-left:8px}
-#slow{position:fixed;left:50%;top:56px;transform:translateX(-50%);z-index:4;font-weight:900;font-size:22px;color:#ffd23f;-webkit-text-stroke:1px #1b2a4a;display:none}
-#fps{position:fixed;left:10px;bottom:8px;z-index:4;font-size:11px;font-weight:700;color:#1b2a4a99}
-#map{position:fixed;right:10px;bottom:10px;z-index:5;width:180px;height:180px;border-radius:50%;box-shadow:0 5px 0 #1b2a4a66;cursor:pointer}
-#map.big{width:520px;height:520px;right:50%;bottom:50%;transform:translate(50%,50%);z-index:15}
-#dot{position:fixed;left:50%;top:50%;width:6px;height:6px;margin:-3px;border-radius:50%;background:#fff;border:1px solid #1b2a4a;z-index:3;opacity:.5;pointer-events:none}
-#banner{position:fixed;left:50%;top:22%;transform:translate(-50%,-50%) scale(.8);z-index:6;font-size:46px;font-weight:900;color:#fff;-webkit-text-stroke:2px #1b2a4a;letter-spacing:2px;opacity:0;pointer-events:none;transition:opacity .4s,transform .4s;text-shadow:0 5px 0 #1b2a4a}
-#banner.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
-#clickhint{position:fixed;left:50%;top:60%;transform:translateX(-50%);z-index:6;background:#1b2a4ad8;color:#fff;font-weight:800;padding:8px 18px;border-radius:14px;display:none;pointer-events:none}
-#help{position:fixed;inset:0;background:#1b2a4acc;z-index:20;display:flex;align-items:center;justify-content:center}
-#help>div{background:#fff;border:4px solid #1b2a4a;border-radius:20px;padding:18px 26px;max-width:760px;max-height:94vh;overflow:auto;box-shadow:0 8px 0 #1b2a4a}
-#help h1{margin:0 0 6px;font-size:36px;color:#e2334b;-webkit-text-stroke:1.5px #1b2a4a;letter-spacing:1px;text-align:center}
-#help p{margin:7px 0;font-size:15px;line-height:1.5}
-#help table{width:100%;border-collapse:collapse;font-size:14px}#help td{padding:3px 6px;border-bottom:1px solid #1b2a4a22;vertical-align:top}#help td:first-child{white-space:nowrap;font-weight:800}
-#help .opts{display:flex;gap:16px;align-items:center;justify-content:center;font-weight:700;font-size:14px;margin:8px 0}
-#flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:9;transition:opacity .4s}
-#compass{position:fixed;left:50%;top:8px;transform:translateX(-50%);width:min(460px,60vw);height:30px;background:rgba(0,0,0,.6);border-radius:15px;z-index:4;overflow:hidden;pointer-events:none;-webkit-mask-image:linear-gradient(90deg,transparent,#000 15%,#000 85%,transparent)}
-#compass span{position:absolute;top:6px;transform:translateX(-50%);font-weight:800;font-size:13px;white-space:nowrap;text-shadow:0 1px 2px #000}
-#compass span.cd{font-size:13px}#compass span.un{animation:pulse 1.1s ease-in-out infinite}@keyframes pulse{50%{opacity:.45;transform:translateX(-50%) scale(1.12)}}#compass span.cn{animation:blink .8s infinite alternate}
-@keyframes blink{from{opacity:1}to{opacity:.35}}
-#compass:after{content:'';position:absolute;left:50%;top:0;bottom:0;width:2px;background:#ffd23f}
-@media (max-width:760px){#obj{display:none}#keys{display:none}#map{width:120px;height:120px}}
+kbd{background:#ffb02e;color:#1a1206;border-radius:4px;padding:0 5px;font-weight:800;font-size:.9em;font-family:inherit}
+button{font:inherit;font-weight:800;border:2px solid #3a2a12;border-radius:8px;background:#1b140a;color:#ffd58a;padding:6px 12px;cursor:pointer;letter-spacing:.5px}
+button:hover{border-color:#ffb02e}
+#cross{position:fixed;left:50%;top:50%;width:22px;height:22px;margin:-11px;pointer-events:none;z-index:4}
+#cross:before,#cross:after{content:"";position:absolute;background:#fff;box-shadow:0 0 2px #000}
+#cross:before{left:10px;top:0;width:2px;height:22px}#cross:after{top:10px;left:0;height:2px;width:22px}
+#tl{position:fixed;left:14px;top:12px;z-index:5;width:280px;pointer-events:none}
+.bar{height:12px;background:#0008;border:2px solid #000a;border-radius:6px;overflow:hidden;margin-bottom:5px}
+.bar i{display:block;height:100%;transition:width .15s}
+#hpbar{background:linear-gradient(#ff4b4b,#b1121b)}#jetbar{background:linear-gradient(#7fd8ff,#2a7fd0)}
+#where{font-weight:900;font-size:20px;letter-spacing:1px;text-shadow:0 2px 3px #000}
+#tr{position:fixed;right:14px;top:10px;text-align:right;z-index:5;pointer-events:none;text-shadow:0 2px 3px #000}
+#pts{font-size:34px;font-weight:900;color:#ffb02e}#tr small{display:block;font-size:12px;opacity:.85}
+#kills{font-size:12px}#fps{font-size:10px;opacity:.5}
+#slots{position:fixed;left:14px;bottom:12px;z-index:5;pointer-events:none;font-size:12px}
+.sl{background:#000a;border-left:3px solid #ffb02e;margin-top:3px;padding:3px 8px;border-radius:0 6px 6px 0;min-width:230px}
+.sl.empty{opacity:.45;border-color:#666}.sl i{float:right;font-style:normal;color:#ffd58a;margin-left:8px}
+#feed{position:fixed;right:14px;top:110px;z-index:5;pointer-events:none;text-align:right;font-weight:800;font-size:14px}
+#feed div{margin-top:4px;text-shadow:0 2px 3px #000;transition:opacity .6s}#feed div b{color:#ffb02e}
+#feed .big{font-size:17px;background:#000a;padding:4px 10px;border-radius:6px;display:inline-block}
+#prompt{position:fixed;left:50%;top:60%;transform:translateX(-50%);z-index:5;font-weight:900;font-size:16px;text-shadow:0 2px 3px #000;pointer-events:none}
+#speed{position:fixed;right:20px;bottom:20px;font-size:40px;font-weight:900;color:#ffb02e;text-shadow:0 3px 4px #000;display:none;z-index:5}
+#slow{position:fixed;left:50%;top:14px;transform:translateX(-50%);font-weight:900;color:#7fd8ff;letter-spacing:4px;display:none;z-index:5}
+#flash{position:fixed;inset:0;background:#c00;opacity:0;pointer-events:none;z-index:9;transition:opacity .35s}
+#btns{position:fixed;right:14px;bottom:14px;z-index:6;display:flex;gap:6px}
+#help{position:fixed;inset:0;background:#05070bd8;z-index:20;display:flex;align-items:center;justify-content:center}
+#help>div{background:#120d07;border:3px solid #5a3d12;border-radius:16px;padding:20px 30px;max-width:720px;max-height:92vh;overflow:auto;box-shadow:0 10px 60px #000}
+#help h1{margin:0;font-size:40px;color:#ffb02e;letter-spacing:2px;text-align:center}
+#help h2{margin:0 0 10px;text-align:center;font-size:15px;opacity:.8;font-weight:600}
+#help p{margin:7px 0;font-size:14px;line-height:1.45}
+#go{font-size:22px;padding:10px 40px;background:#ffb02e;color:#1a1206;border-color:#ffd58a}
+#go:disabled{opacity:.6;cursor:wait}
+#loading{text-align:center;font-size:13px;opacity:.8;min-height:18px}
+/* equip menu */
+#inv{position:fixed;inset:0;background:#05070be6;z-index:15;display:none;align-items:center;justify-content:center;gap:18px}
+#inv .panel{background:linear-gradient(#1d150b,#100b06);border:3px solid #5a3d12;border-radius:12px;padding:14px;box-shadow:0 10px 60px #000}
+#inv h2{margin:0 0 10px;color:#ffb02e;letter-spacing:3px;font-size:18px;text-align:center}
+#doll{position:relative;width:420px;height:520px;background:radial-gradient(ellipse at 50% 45%,#3a2a14 0,#120d07 70%);border:2px solid #3a2a12;border-radius:10px}
+#doll .goatpic{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);height:440px;opacity:.95}
+.slot{position:absolute;width:118px;height:96px;border:2px solid #5a3d12;border-radius:8px;background:#0c0905d0;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer}
+.slot b{position:absolute;top:2px;left:6px;font-size:10px;letter-spacing:1px;color:#c9a36a;text-transform:uppercase}
+.slot em{position:absolute;top:2px;right:6px;font-size:10px;font-style:normal;color:#ffb02e}
+.slot.ok{border-color:#ffb02e;box-shadow:0 0 14px #ffb02e88}
+.s-shoulderL{left:8px;top:40px}.s-shoulderR{right:8px;top:40px}
+.s-rightHand{left:8px;top:210px}.s-leftHand{right:8px;top:210px}
+.s-legL{left:8px;top:390px}.s-legR{right:8px;top:390px}
+#bag{display:grid;grid-template-columns:repeat(8,72px);gap:4px}
+.cell{width:72px;height:72px;border:1px solid #3a2a12;background:#0c0905;border-radius:6px;display:flex;align-items:center;justify-content:center}
+.item{position:relative;background:radial-gradient(circle,#5a4a36 0,#241a0e 75%);width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:grab;border-radius:6px;padding:2px}
+.item img{width:56px;height:56px;object-fit:contain;pointer-events:none}.slot .item img{width:66px;height:66px}
+.item span{font-size:8px;line-height:1;text-align:center;color:#d8c3a0;pointer-events:none;max-height:16px;overflow:hidden}
+.item u{position:absolute;top:2px;right:4px;text-decoration:none;font-size:9px;font-weight:800;color:#ffb02e}
+.item:hover{background:#ffb02e22}.item.sel{background:#ffb02e44;outline:2px solid #ffb02e}
+#desc{margin-top:10px;width:592px;min-height:96px;font-size:13px;background:#0c0905;border:1px solid #3a2a12;border-radius:8px;padding:8px 12px}
+#desc h3{margin:0 0 4px;color:#ffd58a}#desc p{margin:3px 0}#desc .fits{color:#c9a36a}#desc .tip{opacity:.6;font-size:11px}
+#invclose{position:absolute;top:18px;right:24px}
 </style>
-<script type="importmap">{"imports":{"three":"./vendor/three.module.min.js"}}</script>
+<script type="importmap">{"imports":{"three":"./vendor/t170/three.module.min.js","three/addons/":"./vendor/t170/addons/"}}</script>
 </head><body>
 <canvas id="c"></canvas>
-<div id="flash"></div><div id="dot"></div><div id="compass"></div><div id="banner"></div><div id="clickhint">Click to grab the mouse</div>
-<div id="score"><span>CHAOS SCORE</span><b id="pts">0</b><div id="combo"></div></div>
-<div id="obj"><h3>THINGS TO DO</h3><div id="objs"></div></div>
-<div id="top">
-  <a class="btn" id="back" href="index.html?mode=2d">&#9664; 2D MODE</a>
-  <button id="bslow">SLOW-MO</button>
-  <button id="breset">RESET</button>
-  <button id="bhelp">HELP</button>
+<div id="cross"></div>
+<div id="flash"></div>
+<div id="tl"><div class="bar"><i id="hpbar" style="width:100%"></i></div><div class="bar" style="height:7px"><i id="jetbar" style="width:100%"></i></div><div id="where">Goatsville</div></div>
+<div id="tr"><div id="pts">0</div><small>CHAOS</small><div id="kills"></div><div id="fps"></div></div>
+<div id="feed"></div><div id="prompt"></div><div id="speed"></div><div id="slow">SLOW-MO</div>
+<div id="slots"></div>
+<div id="btns"><button id="binv">GEAR (Tab)</button><button id="bhelp">HELP (H)</button><button onclick="location.href='index.html'">2D</button></div>
+<div id="inv"><button id="invclose">CLOSE ✕</button>
+  <div class="panel"><h2>THE GOAT</h2><div id="doll"></div></div>
+  <div class="panel"><h2>ARMORY</h2><div id="bag"></div><div id="desc"></div></div>
 </div>
-<div id="feed"></div>
-<div id="slow">SLOW-MO</div>
-<div id="keys">
-  <kbd>WASD</kbd> move <kbd>Shift</kbd> sprint <kbd>Space</kbd> jump x2 <kbd>LMB</kbd> combo <kbd>RMB</kbd>/<kbd>E</kbd> charge <kbd>C</kbd> roll <kbd>F</kbd> tongue <kbd>Q</kbd> grenade <kbd>B</kbd> jetpack <kbd>T</kbd> drop sword <kbd>M</kbd> map <kbd>H</kbd> help
-</div>
-<canvas id="map" width="180" height="180" title="M: big map"></canvas>
-<div id="fps"></div>
 <div id="help"><div>
-<h1>REALISTIC BEATUP 3D</h1>
-<p style="text-align:center"><b>You are Martlebrough.</b> The town is quiet, the hills are huge, and there are cannons. Fix all of that.</p>
-<table>
-<tr><td><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> / left stick</td><td>Move. <kbd>Shift</kbd> / RT sprints and barges people over.</td></tr>
-<tr><td>Mouse / right stick</td><td>Look. The camera swings in behind you when you run. Wheel zooms.</td></tr>
-<tr><td><kbd>Space</kbd> / A</td><td>Jump; tap again in the air to flip. Hold for higher jumps.</td></tr>
-<tr><td>Left click / X</td><td>Combo: jab, hook, launcher. Hits lock onto whoever is in front of you.</td></tr>
-<tr><td>Right click / <kbd>E</kbd> / RB</td><td>Shoulder charge: flattens people, fells trees, wrecks cars.</td></tr>
-<tr><td><kbd>C</kbd> / B</td><td>Roll (you can't be run over mid-roll). Press it just before you land to roll out of any fall.</td></tr>
-<tr><td>Swords</td><td>Walk over a glowing sword to pick it up: slashes take limbs off. <kbd>T</kbd> drops it.</td></tr>
-<tr><td>In a cannon</td><td>Steer with <kbd>WASD</kbd>, <kbd>Space</kbd> bails out, click to dive-bomb.</td></tr>
-<tr><td><kbd>F</kbd> / Y</td><td>Tongue-grab a person or thing; click to throw it.</td></tr>
-<tr><td><kbd>Q</kbd> / LB &nbsp; <kbd>B</kbd> / LT</td><td>Grenade &nbsp;/&nbsp; jetpack</td></tr>
-<tr><td><kbd>X</kbd> <kbd>G</kbd> <kbd>R</kbd> <kbd>M</kbd></td><td>Ragdoll &nbsp; slow-mo &nbsp; reset &nbsp; big map</td></tr>
-</table>
-<p>Walk into a <b>cannon</b> to get fired across the map: Bellmourn Village, Splinter Hamlet, Yeet Summit and Boulder Farm each have one to fire you home. Red barrels explode, cars don't brake, the boulders on the ledge above the farm roll, and the graveharts in the meadows really don't like being punched.</p>
-<div class="opts"><label>Mouse speed <input id="sens" type="range" min="0" max="50" value="25"></label><label><input id="inv" type="checkbox"> Invert Y</label></div>
-<p style="text-align:center"><button id="go" disabled style="font-size:22px;padding:10px 30px;background:#7cf29a">PLAY!</button> &nbsp; <a class="btn" href="index.html?mode=2d" style="font-size:16px;padding:10px 16px">&#9664; 2D mode</a></p>
-<p id="loading" style="text-align:center;font-weight:800;color:#e2334b">loading...</p>
+<h1>GOATSVILLE</h1><h2>A destruction sandbox. Everything breaks.</h2>
+<p>You are the golden goat. The town has towers up to 12 storeys, schools, a bank, a police station, a grocery store, houses and three parks full of physics toys. Every wall, floor and car can be blown apart. Monsters roam: kobolds, goblins, zombies, giants, a werewolf and rival goats. Villagers mostly just want to live.</p>
+<p><kbd>WASD</kbd> move · <kbd>Shift</kbd> sprint · <kbd>Space</kbd> jump / double jump · hold <kbd>B</kbd> jetpack · <kbd>Mouse</kbd> aim · <kbd>Wheel</kbd> zoom</p>
+<p><kbd>LMB</kbd> right hand · <kbd>RMB</kbd> left hand (or raise shield) · <kbd>F</kbd> shoulder mounts · <kbd>Q</kbd> leg mounts</p>
+<p><kbd>E</kbd> steal / leave a car, ride a zip line, or kick · in a car: <kbd>W</kbd>/<kbd>S</kbd> gas and reverse, <kbd>A</kbd>/<kbd>D</kbd> steer, <kbd>Space</kbd> handbrake, <kbd>Shift</kbd> boost. Shoulder and leg mounts still fire while driving.</p>
+<p><kbd>Tab</kbd> gear screen: put guns in either hand, missile pods and gatlings on the shoulders and legs. Weapon pickups glow gold all over town (the police armory is stocked).</p>
+<p><kbd>G</kbd> slow-mo · <kbd>H</kbd> help · <kbd>R</kbd> restart</p>
+<p style="text-align:center;margin-top:14px"><button id="go" disabled>LOADING…</button></p>
+<div id="loading">loading…</div>
 </div></div>
-<script type="module" src="world3d.js"></script>
+<script type="module" src="game3d.js"></script>
 </body></html>
