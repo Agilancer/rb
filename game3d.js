@@ -14,6 +14,7 @@ import { setCeilingTextures } from './vc/js/destruct/ceilings.js';
 import { buildWeaponModel } from './vc/js/weapons.js';
 import { loadGuns } from './vc/js/guns3d.js';
 import { buildTown, TOWN } from './town.js';
+import { retargetAll } from './retarget.js';
 
 const $ = (s) => document.querySelector(s);
 const V3 = THREE.Vector3, UP = new V3(0, 1, 0);
@@ -372,6 +373,7 @@ function makeActor(model, clips) {
   return { mixer, acts, cur: null };
 }
 function play(A, k, fade = 0.2, speed = 1) {
+  if (A === goat && (k === 'idle' || k === 'walk' || k === 'run') && armedMelee() && A.acts[k + 'A']) k += 'A'; // sword-ready stance
   const a = A.acts[k]; if (!a) return;
   a.timeScale = speed;
   if (A.cur === a && a.isRunning() && a.loop !== THREE.LoopOnce) return;
@@ -379,13 +381,40 @@ function play(A, k, fade = 0.2, speed = 1) {
   if (A.cur && A.cur !== a) A.cur.fadeOut(fade);
   A.cur = a;
 }
+const VLIST = [
+  ['idle', 'axe_unarmed_idle'], ['walk', 'axe_unarmed_walk_forward'], ['run', 'axe_unarmed_run_forward'],
+  ['jump', 'sword_and_shield_jump', 0.17], ['hit', 'sword_and_shield_impact'], ['death', 'sword_and_shield_death'], ['atk', 'standing_melee_attack_kick_ver_2'],
+  ['idleA', 'sword_and_shield_idle'], ['walkA', 'sword_and_shield_walk'], ['runA', 'sword_and_shield_run'],
+  ['sw_slash', 'sword_and_shield_slash'], ['sw_back', 'axe_standing_melee_attack_backhand'], ['sw_down', 'standing_melee_attack_downward'],
+  ['sw_cleave', 'great_sword_slash'], ['sw_flat', 'axe_standing_melee_attack_horizontal'], ['sw_stab', 'stabbing'], ['sw_lunge', 'sword_and_shield_attack'],
+];
+const SW = {};
+// each weapon class swings a three-hit chain: two cuts and a finisher
+const SWINGS = { blade: ['sw_slash', 'sw_back', 'sw_down'], heavy: ['sw_cleave', 'sw_flat', 'sw_down'], spear: ['sw_stab', 'sw_stab', 'sw_lunge'] };
+/** play the strike out of one of the hero's attack clips, squeezed into dur seconds, the hit at its middle */
+function swingAnim(name, dur) {
+  const s = SW[name]; if (!s || !goat) return;
+  const from = Math.max(0, s.peak - 0.42), to = Math.min(s.dur, s.peak + 0.34), a = s.act;
+  a.reset(); a.time = from; a.timeScale = (to - from) / dur; a.setEffectiveWeight(1); a.fadeIn(0.05).play();
+  if (goat.cur && goat.cur !== a) goat.cur.fadeOut(0.08);
+  goat.cur = a; P.animLock = T + dur;
+}
+const armedMelee = () => [INV.equip.rightHand, INV.equip.leftHand].some((it) => it && WD[it.w].kind === 'melee');
 async function loadPlayer(gl) {
-  const g = await gl.loadAsync('assets/monsters/goatman_gold_good.glb');
+  const [g, va] = await Promise.all([gl.loadAsync('assets/monsters/goatman_gold_good.glb'), gl.loadAsync('assets/anims/vesper.glb')]);
   const m = setupModel(g.scene, 2.4);
+  const R = retargetAll(va.scene, va.animations, m.root, VLIST);
+  if (R.missing.length) console.info('goat bones with no vesper match:', R.missing.join(', '));
   // a pivot at the hips so the goat can flip and tumble around his middle
   const pivot = new THREE.Group(); pivot.position.y = 1.15;
   m.g.remove(m.root); pivot.add(m.root); m.root.position.y -= 1.15; m.g.add(pivot);
-  goat = { ...m, pivot, ...makeActor(m, g.animations), clips: g.animations };
+  const clips = Object.values(R.clips);
+  goat = { ...m, pivot, ...makeActor(m, clips), clips };
+  for (const k of ['idleA', 'walkA', 'runA']) if (R.clips[k]) goat.acts[k] = goat.mixer.clipAction(R.clips[k]);
+  for (const k of Object.keys(R.clips)) if (k.startsWith('sw_') || k === 'atk') {
+    const a = goat.mixer.clipAction(R.clips[k]); a.setLoop(THREE.LoopOnce, 1); a.clampWhenFinished = true;
+    SW[k] = { act: a, peak: R.peaks[k], dur: R.clips[k].duration };
+  }
   scene.add(goat.g);
   play(goat, 'idle');
   P.pos.copy(TOWN.spawn);
@@ -518,7 +547,8 @@ function updatePlayer(dt) {
   goat.pivot.rotation.z = damp(goat.pivot.rotation.z, P.grounded ? clamp(-dy * 0.6, -0.25, 0.25) * clamp(flat / 10, 0, 1) : 0, 8, dt);
   // animation
   if (!P.attackT || P.attackT < T) {
-    if (!P.grounded && (P.vel.y > 0 || P.airT > 0.35)) { if (goat.cur !== goat.acts.jump) play(goat, 'jump', 0.15, 0.9); }
+    if (T < (P.animLock || 0)) { /* a swing is playing out */ }
+    else if (!P.grounded && (P.vel.y > 0 || P.airT > 0.35)) { if (goat.cur !== goat.acts.jump) play(goat, 'jump', 0.15, 0.9); }
     else if (P.slideT > 0) play(goat, 'idle');
     else if (flat > 5.5) play(goat, 'run', 0.15, clamp(flat / 8, 0.8, 1.6));
     else if (flat > 0.5) play(goat, 'walk', 0.15, clamp(flat / 2.4, 0.7, 2.2));
@@ -648,10 +678,6 @@ function poseArms(dt) {
   if (P.swing) { P.swing.t += dt; if (P.swing.t > P.swing.dur) P.swing = null; }
   aimArms(dt);
   goat.g.updateMatrixWorld(true);
-  for (const [sid, side] of [['rightHand', 'Right'], ['leftHand', 'Left']]) {
-    const it = INV.equip[sid];
-    if (it && WD[it.w].kind === 'melee' && !P.rag) meleePose(side, it, dt);
-  }
 }
 
 // ---- ragdoll (R, big hits, big falls) ---------------------------------------------------------------
@@ -709,7 +735,7 @@ function headbutt() {
   if (mouse.r) P.yaw = camYaw;
   const f = new V3(Math.sin(P.yaw), 0, Math.cos(P.yaw)), charge = Math.hypot(P.vel.x, P.vel.z) > 10;
   P.vel.addScaledVector(f, charge ? 6 : 9);
-  play(goat, 'atk', 0.06, 1.8);
+  swingAnim('sw_lunge', 0.32);
   setTimeout(() => {
     const power = charge ? 1.6 : 1, c = P.pos.clone().addScaledVector(f, 1.3).setY(P.pos.y + 1.4);
     let hit = false;
@@ -1308,9 +1334,9 @@ function melee(d, it) {
   P.chain = T - (P.lastSwing || -9) < 0.8 ? ((P.chain || 0) + 1) % 3 : 0; P.lastSwing = T;
   const fin = P.chain === 2 && !!it, heavy = !!d.knock, quick = d.rate < 0.35;
   const side = it && INV.equip.leftHand === it ? 'Left' : 'Right';
-  const dur = (quick ? 0.2 : heavy ? 0.4 : 0.28) * (fin ? 1.3 : 1);
+  const dur = clamp(d.rate * 0.85, 0.26, 0.55) * (fin ? 1.2 : 1);
   if (it) P.swing = { t: 0, dur, side, kind: fin ? 'over' : P.chain === 1 ? 'back' : 'fore' };
-  else play(goat, 'atk', 0.06, 1.6); // a kick
+  swingAnim(it ? SWINGS[meleeClass(d)][P.chain] : 'atk', it ? dur : Math.max(dur, 0.4)); // no weapon: a kick
   P.fireFace = dur + 0.25; P.yaw = camYaw; P.attackT = T + dur + 0.1;
   sfx.whoosh(P.pos, heavy ? 0.7 : quick ? 1.3 : 1);
   const f0 = new V3(Math.sin(P.yaw), 0, Math.cos(P.yaw));
@@ -2017,7 +2043,7 @@ function jackStep(dt) {
   P.yaw = Math.atan2(-J.left.x, -J.left.z);
   goat.g.position.copy(P.pos); goat.g.rotation.y = P.yaw;
   if (J.t > 0.2 && !J.yank) {
-    J.yank = true; play(goat, 'atk', 0.05, 1.5); sfx.slap(car.pos);
+    J.yank = true; swingAnim('sw_lunge', 0.4); sfx.slap(car.pos);
     if (!car.cop) J.npc = ejectDriver(car, 'drag');
   }
   if (J.npc) {
