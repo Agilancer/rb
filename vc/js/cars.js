@@ -144,22 +144,26 @@ const SHAPE = /* glsl */`
 `;
 
 function carMaterials(atlas, skin) {
-  const mat = new THREE.MeshStandardMaterial({ roughness: 0.4, metalness: 0.25 });
+  const mat = new THREE.MeshStandardMaterial({ roughness: 0.4, metalness: 0.25, side: THREE.DoubleSide });
   mat.onBeforeCompile = (sh) => {
     sh.uniforms.uSkin = { value: skin };
     sh.uniforms.uCars = { value: atlas };
     sh.vertexShader = sh.vertexShader
-      .replace('#include <common>', `#include <common>\n${SHAPE}\nvarying vec2 vCarUv;\nvarying float vCarDark;\nvarying float vCarCut;`)
+      .replace('#include <common>', `#include <common>\n${SHAPE}\nvarying vec2 vCarUv;\nvarying float vCarDark;\nvarying float vCarCut;\nvarying float vCarH;`)
       .replace('#include <beginnormal_vertex>', `vec3 carP, objectNormal; vec2 carUv; float carDark, carCut;
         carShape(carP, objectNormal, carUv, carDark, carCut);
-        vCarUv = carUv; vCarDark = carDark; vCarCut = carCut;`)
+        vCarUv = carUv; vCarDark = carDark; vCarCut = carCut; vCarH = carP.y;`)
       .replace('#include <begin_vertex>', 'vec3 transformed = carP;');
     sh.fragmentShader = sh.fragmentShader
-      .replace('#include <common>', '#include <common>\nuniform sampler2D uCars;\nvarying vec2 vCarUv;\nvarying float vCarDark;\nvarying float vCarCut;')
+      .replace('#include <common>', '#include <common>\nuniform sampler2D uCars;\nvarying vec2 vCarUv;\nvarying float vCarDark;\nvarying float vCarCut;\nvarying float vCarH;')
       .replace('#include <map_fragment>', `
         vec4 carC = texture2D(uCars, vCarUv);
         diffuseColor.rgb *= carC.rgb * vCarDark;
-        float carLum = dot(carC.rgb, vec3(0.2126, 0.7152, 0.0722));`)
+        float carLum = dot(carC.rgb, vec3(0.2126, 0.7152, 0.0722));
+        // Goatsville: the glass is see-through, so you can see who's driving; inside is dark
+        float carSat = max(carC.r, max(carC.g, carC.b)) - min(carC.r, min(carC.g, carC.b));
+        if (vCarH > 0.86 && carLum < 0.15 && carSat < 0.09) discard;
+        if (!gl_FrontFacing) diffuseColor.rgb *= 0.18;`)
       // Glass and dark trim glossy, paint a little less
       .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\nroughnessFactor = mix(roughnessFactor, 0.08, smoothstep(0.16, 0.05, carLum));');
   };
@@ -246,7 +250,7 @@ export class Cars {
   make(i, skin, x, z, yaw) {
     const c = CAR_SKINS[skin], M = this.M;
     const car = {
-      i, skin, kind: 'car', alive: true, hp: 24, state: 0, pos: new V3(x, 0, z), yaw,
+      i, skin, kind: 'car', alive: true, hp: 90, state: 0, pos: new V3(x, 0, z), yaw,
       len: c.length * M, wid: c.width * M, min: new V3(), max: new V3(), moving: false,
     };
     this.bounds(car);
